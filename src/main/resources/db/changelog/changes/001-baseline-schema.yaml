@@ -1,0 +1,150 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-temples
+      author: bonyalex
+      changes:
+        - createTable:
+            tableName: temples
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 001-create-offerings
+      author: bonyalex
+      changes:
+        - createTable:
+            tableName: offerings
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: temple_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_offerings_temple
+                    references: temples(id)
+              - column:
+                  name: name
+                  type: VARCHAR(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 001-create-devotee-orders
+      author: bonyalex
+      changes:
+        - createTable:
+            tableName: devotee_orders
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: temple_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_devotee_orders_temple
+                    references: temples(id)
+              - column:
+                  name: devotee_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: devotee_phone
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: nakshatra
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total
+                  type: DECIMAL(14,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 001-create-order-lines
+      author: bonyalex
+      changes:
+        - createTable:
+            tableName: order_lines
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_lines_order
+                    references: devotee_orders(id)
+              - column:
+                  name: offering_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_lines_offering
+                    references: offerings(id)
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit_price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: line_total
+                  type: DECIMAL(14,2)
+                  constraints:
+                    nullable: false

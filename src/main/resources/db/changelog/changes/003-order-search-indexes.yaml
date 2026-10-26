@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-index-orders-by-temple-date
+      author: bonyalex
+      changes:
+        - createIndex:
+            tableName: devotee_orders
+            indexName: idx_orders_temple_date_id
+            columns:
+              - column:
+                  name: temple_id
+              - column:
+                  name: order_date
+                  descending: true
+              - column:
+                  name: id
+                  descending: true
+  - changeSet:
+      id: 003-index-orders-by-temple-status-date
+      author: bonyalex
+      changes:
+        - createIndex:
+            tableName: devotee_orders
+            indexName: idx_orders_temple_status_date_id
+            columns:
+              - column:
+                  name: temple_id
+              - column:
+                  name: status
+              - column:
+                  name: order_date
+                  descending: true
+              - column:
+                  name: id
+                  descending: true
+  - changeSet:
+      id: 003-index-orders-by-temple-phone
+      author: bonyalex
+      changes:
+        - createIndex:
+            tableName: devotee_orders
+            indexName: idx_orders_temple_phone_date_id
+            columns:
+              - column:
+                  name: temple_id
+              - column:
+                  name: devotee_phone
+              - column:
+                  name: order_date
+                  descending: true
+              - column:
+                  name: id
+                  descending: true

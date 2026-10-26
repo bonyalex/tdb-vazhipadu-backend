@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-add-order-status
+      author: bonyalex
+      changes:
+        - addColumn:
+            tableName: devotee_orders
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: PLACED
+                  constraints:
+                    nullable: false
