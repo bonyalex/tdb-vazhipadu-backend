@@ -38,15 +38,15 @@ class AuthApiIntegrationTest {
     void successfulLoginReturnsAccessToken() throws Exception {
         mockMvc.perform(login(adminEmail, adminCredential))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.tokenType").value("Bearer"));
+                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.data.tokenType").value("Bearer"));
     }
 
     @Test
     void wrongPasswordAndWrongEmailGiveTheSameUnauthorizedMessage() throws Exception {
         String wrongPassword = mockMvc.perform(login(adminEmail, "nope"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error.status").value(401))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -56,8 +56,8 @@ class AuthApiIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String messageForPassword = objectMapper.readTree(wrongPassword).get("message").asText();
-        String messageForEmail = objectMapper.readTree(wrongEmail).get("message").asText();
+        String messageForPassword = objectMapper.readTree(wrongPassword).get("error").get("message").asText();
+        String messageForEmail = objectMapper.readTree(wrongEmail).get("error").get("message").asText();
 
         assertThat(messageForPassword).isEqualTo(messageForEmail);
         assertThat(wrongPassword).doesNotContain(adminCredential);
@@ -67,8 +67,8 @@ class AuthApiIntegrationTest {
     void protectedEndpointWithoutTokenIsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/offerings"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.status").value(401))
-                .andExpect(jsonPath("$.path").value("/api/offerings"));
+                .andExpect(jsonPath("$.error.status").value(401))
+                .andExpect(jsonPath("$.error.path").value("/api/offerings"));
     }
 
     @Test
@@ -83,7 +83,7 @@ class AuthApiIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        String token = objectMapper.readTree(body).get("accessToken").asText();
+        String token = objectMapper.readTree(body).get("data").get("accessToken").asText();
 
         mockMvc.perform(get("/api/orders/999999").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isNotFound());

@@ -18,12 +18,12 @@ body:json {
 }
 
 script:post-response {
-  bru.setVar("authToken", res.body.accessToken);
+  bru.setVar("authToken", res.body.data.accessToken);
 }
 
 tests {
   test("login returns a token", function () {
     expect(res.status).to.equal(200);
-    expect(res.body.accessToken).to.be.a("string");
+    expect(res.body.data.accessToken).to.be.a("string");
   });
 }
