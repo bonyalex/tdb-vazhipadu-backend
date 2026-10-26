@@ -25,7 +25,7 @@ public class TempleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<TempleResponse> create(@Valid @RequestBody CreateTempleRequest request) {
-        return ApiResponse.success(templeService.create(request));
+        return ApiResponse.created(templeService.create(request));
     }
 
     @GetMapping("/{id}")

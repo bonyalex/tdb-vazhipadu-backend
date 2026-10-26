@@ -35,7 +35,7 @@ public class OfferingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OfferingResponse> create(@Valid @RequestBody CreateOfferingRequest request) {
-        return ApiResponse.success(offeringService.create(request));
+        return ApiResponse.created(offeringService.create(request));
     }
 
     @PutMapping("/{id}")

@@ -38,7 +38,7 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OrderResponse> place(@Valid @RequestBody PlaceOrderRequest request) {
-        return ApiResponse.success(orderService.place(request));
+        return ApiResponse.created(orderService.place(request));
     }
 
     @GetMapping

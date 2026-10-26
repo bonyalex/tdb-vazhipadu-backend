@@ -25,6 +25,7 @@ class ResponseEnvelopeIntegrationTest {
         mockMvc.perform(post("/api/temples").contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Sree Temple\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.data.name").value("Sree Temple"))
                 .andExpect(jsonPath("$.error").value(nullValue()));
     }
@@ -34,6 +35,7 @@ class ResponseEnvelopeIntegrationTest {
         mockMvc.perform(get("/api/temples/999999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.data").value(nullValue()))
                 .andExpect(jsonPath("$.error.status").value(404))
                 .andExpect(jsonPath("$.error.path").value("/api/temples/999999"));
