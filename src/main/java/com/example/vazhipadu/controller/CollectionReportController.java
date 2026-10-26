@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,9 +24,9 @@ public class CollectionReportController {
     private final CollectionReportService collectionReportService;
 
     @GetMapping
-    public ApiResponse<DailyCollectionResponse> dailyCollection(
+    public ResponseEntity<ApiResponse<DailyCollectionResponse>> dailyCollection(
             @PathVariable Long templeId,
             @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ApiResponse.success(collectionReportService.dailyCollection(templeId, date));
+        return ResponseEntity.ok(ApiResponse.success(collectionReportService.dailyCollection(templeId, date)));
     }
 }
