@@ -6,6 +6,7 @@ import com.example.vazhipadu.dto.response.OrderResponse;
 import com.example.vazhipadu.entity.DevoteeOrder;
 import com.example.vazhipadu.entity.Offering;
 import com.example.vazhipadu.entity.OrderLine;
+import com.example.vazhipadu.entity.OrderStatus;
 import com.example.vazhipadu.entity.Temple;
 import com.example.vazhipadu.exception.BusinessRuleException;
 import com.example.vazhipadu.exception.InvalidRequestException;
@@ -60,6 +61,7 @@ public class OrderService {
         for (OrderLineRequest lineRequest : request.lines()) {
             Offering offering = offerings.get(lineRequest.offeringId());
             ensureBookable(offering, temple);
+            ensureWithinDailyLimit(offering, request.orderDate(), lineRequest.quantity());
             OrderLine line = new OrderLine();
             line.setOffering(offering);
             line.setQuantity(lineRequest.quantity());
@@ -90,7 +92,7 @@ public class OrderService {
 
     private Map<Long, Offering> loadOfferings(List<OrderLineRequest> lines) {
         List<Long> ids = lines.stream().map(OrderLineRequest::offeringId).toList();
-        Map<Long, Offering> offerings = offeringRepository.findAllById(ids).stream()
+        Map<Long, Offering> offerings = offeringRepository.findAllByIdForUpdate(ids).stream()
                 .collect(Collectors.toMap(Offering::getId, Function.identity()));
         for (Long id : ids) {
             if (!offerings.containsKey(id)) {
@@ -98,6 +100,18 @@ public class OrderService {
             }
         }
         return offerings;
+    }
+
+    private void ensureWithinDailyLimit(Offering offering, LocalDate orderDate, int quantity) {
+        Integer limit = offering.getDailyLimit();
+        if (limit == null) {
+            return;
+        }
+        long booked = orderRepository.sumBookedQuantity(offering.getId(), orderDate, OrderStatus.PLACED);
+        if (booked + quantity > limit) {
+            throw new BusinessRuleException("Offering " + offering.getId() + " has only "
+                    + Math.max(0, limit - booked) + " left for " + orderDate);
+        }
     }
 
     private void ensureBookable(Offering offering, Temple temple) {

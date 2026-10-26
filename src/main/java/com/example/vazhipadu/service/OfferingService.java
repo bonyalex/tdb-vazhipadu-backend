@@ -34,6 +34,7 @@ public class OfferingService {
         offering.setName(request.name().trim());
         offering.setPrice(normalise(request.price()));
         offering.setActive(request.active() == null || request.active());
+        offering.setDailyLimit(request.dailyLimit());
         return OfferingResponse.from(offeringRepository.save(offering));
     }
 
@@ -43,6 +44,7 @@ public class OfferingService {
         offering.setName(request.name().trim());
         offering.setPrice(normalise(request.price()));
         offering.setActive(request.active());
+        offering.setDailyLimit(request.dailyLimit());
         return OfferingResponse.from(offering);
     }
 

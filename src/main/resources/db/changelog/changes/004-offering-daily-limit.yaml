@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-add-offering-daily-limit
+      author: bonyalex
+      changes:
+        - addColumn:
+            tableName: offerings
+            columns:
+              - column:
+                  name: daily_limit
+                  type: INT

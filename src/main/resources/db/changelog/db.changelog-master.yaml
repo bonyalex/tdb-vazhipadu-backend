@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changes/002-order-status.yaml
   - include:
       file: db/changelog/changes/003-order-search-indexes.yaml
+  - include:
+      file: db/changelog/changes/004-offering-daily-limit.yaml
