@@ -1,0 +1,29 @@
+meta {
+  name: 00 Login
+  type: http
+  seq: 0
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{process.env.ADMIN_EMAIL}}",
+    "password": "{{process.env.ADMIN_PASSWORD}}"
+  }
+}
+
+script:post-response {
+  bru.setVar("authToken", res.body.accessToken);
+}
+
+tests {
+  test("login returns a token", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.accessToken).to.be.a("string");
+  });
+}
