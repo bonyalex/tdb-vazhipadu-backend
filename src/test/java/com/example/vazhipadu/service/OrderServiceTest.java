@@ -185,6 +185,55 @@ class OrderServiceTest {
         verify(orderRepository, never()).sumBookedQuantity(any(), any(), any());
     }
 
+    @Test
+    void cancellingPlacedOrderMarksItCancelled() {
+        DevoteeOrder order = new DevoteeOrder();
+        order.setTemple(temple);
+        when(orderRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(order));
+
+        OrderResponse response = orderService.cancel(5L);
+
+        assertEquals(OrderStatus.CANCELLED, response.status());
+    }
+
+    @Test
+    void cancellingAnAlreadyCancelledOrderIsRejected() {
+        DevoteeOrder order = new DevoteeOrder();
+        order.setTemple(temple);
+        order.setStatus(OrderStatus.CANCELLED);
+        when(orderRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(order));
+
+        assertThrows(BusinessRuleException.class, () -> orderService.cancel(5L));
+    }
+
+    @Test
+    void cancellingUnknownOrderIsNotFound() {
+        when(orderRepository.findByIdForUpdate(5L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> orderService.cancel(5L));
+    }
+
+    @Test
+    void orderPlacedAtQuarterPastMidnightIstIsAcceptedForThatIstDate() {
+        Instant justAfterMidnightIst = Instant.parse("2026-10-25T18:45:00Z");
+        OrderService lateService = new OrderService(
+                orderRepository,
+                offeringRepository,
+                templeRepository,
+                Clock.fixed(justAfterMidnightIst, ZoneOffset.UTC));
+        Offering pushpanjali = offering(10L, temple, "30.00", true);
+        when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(pushpanjali));
+        when(orderRepository.save(any(DevoteeOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrderResponse response = lateService.place(request(TODAY_IST, new OrderLineRequest(10L, 1)));
+
+        assertEquals(TODAY_IST, response.orderDate());
+        assertThrows(
+                InvalidRequestException.class,
+                () -> lateService.place(request(TODAY_IST.minusDays(1), new OrderLineRequest(10L, 1))));
+    }
+
     private PlaceOrderRequest request(LocalDate date, OrderLineRequest... lines) {
         return new PlaceOrderRequest(1L, "Anil Kumar", "9876543210", Nakshatra.ROHINI, date, List.of(lines));
     }

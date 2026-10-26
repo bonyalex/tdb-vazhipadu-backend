@@ -52,6 +52,11 @@ public class OrderController {
         return orderSearchService.search(templeId, from, to, status, phone, page, size);
     }
 
+    @PostMapping("/{id}/cancel")
+    public OrderResponse cancel(@PathVariable Long id) {
+        return orderService.cancel(id);
+    }
+
     @GetMapping("/{id}")
     public OrderResponse get(@PathVariable Long id) {
         return orderService.get(id);
