@@ -1,5 +1,6 @@
 package com.example.vazhipadu.config;
 
+import com.example.vazhipadu.dto.response.ApiResponse;
 import com.example.vazhipadu.exception.ApiError;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
@@ -60,7 +61,7 @@ public class SecurityConfig {
                     List.of());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            objectMapper.writeValue(response.getOutputStream(), body);
+            objectMapper.writeValue(response.getOutputStream(), ApiResponse.error(body));
         };
     }
 

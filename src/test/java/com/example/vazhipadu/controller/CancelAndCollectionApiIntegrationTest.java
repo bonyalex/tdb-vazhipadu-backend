@@ -53,13 +53,13 @@ class CancelAndCollectionApiIntegrationTest {
 
         mockMvc.perform(post("/api/orders/" + cancelled + "/cancel"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CANCELLED"));
+                .andExpect(jsonPath("$.data.status").value("CANCELLED"));
 
         mockMvc.perform(get("/api/temples/" + templeId + "/collection").param("date", DATE.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.offerings.length()").value(1))
-                .andExpect(jsonPath("$.offerings[0].count").value(1))
-                .andExpect(jsonPath("$.offerings[0].amount").value(30.10));
+                .andExpect(jsonPath("$.data.offerings.length()").value(1))
+                .andExpect(jsonPath("$.data.offerings[0].count").value(1))
+                .andExpect(jsonPath("$.data.offerings[0].amount").value(30.10));
         placeOrder(pushpanjaliId, 1);
     }
 
@@ -70,7 +70,7 @@ class CancelAndCollectionApiIntegrationTest {
 
         mockMvc.perform(post("/api/orders/" + orderId + "/cancel"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Order " + orderId + " is already cancelled"));
+                .andExpect(jsonPath("$.error.message").value("Order " + orderId + " is already cancelled"));
     }
 
     @Test
@@ -86,22 +86,22 @@ class CancelAndCollectionApiIntegrationTest {
 
         mockMvc.perform(get("/api/temples/" + templeId + "/collection").param("date", DATE.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.offerings.length()").value(2))
-                .andExpect(jsonPath("$.offerings[0].offeringName").value("Pushpanjali"))
-                .andExpect(jsonPath("$.offerings[0].count").value(2))
-                .andExpect(jsonPath("$.offerings[0].amount").value(60.20))
-                .andExpect(jsonPath("$.offerings[1].count").value(7))
-                .andExpect(jsonPath("$.offerings[1].amount").value(351.75))
-                .andExpect(jsonPath("$.totalCount").value(9))
-                .andExpect(jsonPath("$.totalAmount").value(411.95));
+                .andExpect(jsonPath("$.data.offerings.length()").value(2))
+                .andExpect(jsonPath("$.data.offerings[0].offeringName").value("Pushpanjali"))
+                .andExpect(jsonPath("$.data.offerings[0].count").value(2))
+                .andExpect(jsonPath("$.data.offerings[0].amount").value(60.20))
+                .andExpect(jsonPath("$.data.offerings[1].count").value(7))
+                .andExpect(jsonPath("$.data.offerings[1].amount").value(351.75))
+                .andExpect(jsonPath("$.data.totalCount").value(9))
+                .andExpect(jsonPath("$.data.totalAmount").value(411.95));
     }
 
     @Test
     void reportForDateWithNoOrdersIsEmptyAndUnknownTempleIsNotFound() throws Exception {
         mockMvc.perform(get("/api/temples/" + templeId + "/collection").param("date", DATE.plusDays(30).toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.offerings.length()").value(0))
-                .andExpect(jsonPath("$.totalAmount").value(0));
+                .andExpect(jsonPath("$.data.offerings.length()").value(0))
+                .andExpect(jsonPath("$.data.totalAmount").value(0));
 
         mockMvc.perform(get("/api/temples/999999/collection").param("date", DATE.toString()))
                 .andExpect(status().isNotFound());
@@ -130,6 +130,6 @@ class CancelAndCollectionApiIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         JsonNode node = objectMapper.readTree(response);
-        return node.get("id").asLong();
+        return node.get("data").get("id").asLong();
     }
 }

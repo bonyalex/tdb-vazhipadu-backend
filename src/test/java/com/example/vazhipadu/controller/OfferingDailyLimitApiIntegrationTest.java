@@ -39,7 +39,7 @@ class OfferingDailyLimitApiIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        templeId = objectMapper.readTree(response).get("id").asLong();
+        templeId = objectMapper.readTree(response).get("data").get("id").asLong();
     }
 
     @Test
@@ -48,7 +48,7 @@ class OfferingDailyLimitApiIntegrationTest {
 
         mockMvc.perform(get("/api/offerings/" + id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dailyLimit").value(50));
+                .andExpect(jsonPath("$.data.dailyLimit").value(50));
     }
 
     @Test
@@ -57,7 +57,7 @@ class OfferingDailyLimitApiIntegrationTest {
 
         mockMvc.perform(get("/api/offerings/" + id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dailyLimit").doesNotExist());
+                .andExpect(jsonPath("$.data.dailyLimit").doesNotExist());
     }
 
     @Test
@@ -69,12 +69,12 @@ class OfferingDailyLimitApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Archana\",\"price\":50,\"active\":true,\"dailyLimit\":10}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dailyLimit").value(10));
+                .andExpect(jsonPath("$.data.dailyLimit").value(10));
         mockMvc.perform(put("/api/offerings/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Archana\",\"price\":50,\"active\":true}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dailyLimit").doesNotExist());
+                .andExpect(jsonPath("$.data.dailyLimit").doesNotExist());
     }
 
     @Test
@@ -103,6 +103,6 @@ class OfferingDailyLimitApiIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         JsonNode node = objectMapper.readTree(response);
-        return node.get("id").asLong();
+        return node.get("data").get("id").asLong();
     }
 }

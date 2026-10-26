@@ -17,7 +17,7 @@ body:json {
 }
 
 script:post-response {
-  bru.setVar("templeId", res.body.id);
+  bru.setVar("templeId", res.body.data.id);
 }
 
 tests {

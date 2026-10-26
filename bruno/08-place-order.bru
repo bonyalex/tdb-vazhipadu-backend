@@ -30,12 +30,12 @@ script:pre-request {
 }
 
 script:post-response {
-  bru.setVar("orderId", res.body.id);
+  bru.setVar("orderId", res.body.data.id);
 }
 
 tests {
   test("total is 110", function () {
     expect(res.status).to.equal(201);
-    expect(res.body.total).to.equal(110);
+    expect(res.body.data.total).to.equal(110);
   });
 }

@@ -61,9 +61,9 @@ class OrderSearchApiIntegrationTest {
 
         mockMvc.perform(get("/api/orders").param("templeId", String.valueOf(templeId)).param("phone", "9000000001"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.content[*].devoteePhone", everyItem(is("9000000001"))))
-                .andExpect(jsonPath("$.content[*].templeId", everyItem(is((int) templeId))));
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andExpect(jsonPath("$.data.content[*].devoteePhone", everyItem(is("9000000001"))))
+                .andExpect(jsonPath("$.data.content[*].templeId", everyItem(is((int) templeId))));
     }
 
     @Test
@@ -72,7 +72,7 @@ class OrderSearchApiIntegrationTest {
 
         mockMvc.perform(get("/api/orders").param("templeId", String.valueOf(templeId)).param("phone", "9000000010"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.data.content", hasSize(0)));
     }
 
     @Test
@@ -92,7 +92,7 @@ class OrderSearchApiIntegrationTest {
                     .andReturn()
                     .getResponse()
                     .getContentAsString();
-            for (JsonNode order : objectMapper.readTree(body).get("content")) {
+            for (JsonNode order : objectMapper.readTree(body).get("data").get("content")) {
                 seen.add(order.get("id").asLong());
             }
         }
@@ -114,8 +114,8 @@ class OrderSearchApiIntegrationTest {
                         .param("from", TODAY.plusDays(2).toString())
                         .param("to", TODAY.plusDays(8).toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].orderDate").value(TODAY.plusDays(5).toString()));
+                .andExpect(jsonPath("$.data.totalElements").value(1))
+                .andExpect(jsonPath("$.data.content[0].orderDate").value(TODAY.plusDays(5).toString()));
     }
 
     @Test
@@ -124,10 +124,10 @@ class OrderSearchApiIntegrationTest {
 
         mockMvc.perform(get("/api/orders").param("templeId", String.valueOf(templeId)).param("status", "PLACED"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[*].status", everyItem(is("PLACED"))));
+                .andExpect(jsonPath("$.data.content[*].status", everyItem(is("PLACED"))));
         mockMvc.perform(get("/api/orders").param("templeId", String.valueOf(templeId)).param("status", "CANCELLED"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)));
+                .andExpect(jsonPath("$.data.content", hasSize(0)));
     }
 
     @Test
@@ -137,16 +137,16 @@ class OrderSearchApiIntegrationTest {
         long latest = placeOrder(templeId, offeringId, "9000000006", TODAY.plusDays(4));
 
         mockMvc.perform(get("/api/orders").param("templeId", String.valueOf(templeId)))
-                .andExpect(jsonPath("$.content[0].id").value(latest))
-                .andExpect(jsonPath("$.content[1].id").value(second))
-                .andExpect(jsonPath("$.content[2].id").value(first));
+                .andExpect(jsonPath("$.data.content[0].id").value(latest))
+                .andExpect(jsonPath("$.data.content[1].id").value(second))
+                .andExpect(jsonPath("$.data.content[2].id").value(first));
     }
 
     @Test
     void pageSizeAboveTheCapIsRejected() throws Exception {
         mockMvc.perform(get("/api/orders").param("templeId", String.valueOf(templeId)).param("size", "101"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+                .andExpect(jsonPath("$.error.status").value(400));
     }
 
     @Test
@@ -191,6 +191,6 @@ class OrderSearchApiIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        return objectMapper.readTree(response).get("id").asLong();
+        return objectMapper.readTree(response).get("data").get("id").asLong();
     }
 }
