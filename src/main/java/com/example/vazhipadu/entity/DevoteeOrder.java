@@ -51,7 +51,7 @@ public class DevoteeOrder {
     @Column(nullable = false)
     private LocalDate orderDate;
 
-    @Column(nullable = false, precision = 12, scale = 2)
+    @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal total;
 
     @CreationTimestamp
