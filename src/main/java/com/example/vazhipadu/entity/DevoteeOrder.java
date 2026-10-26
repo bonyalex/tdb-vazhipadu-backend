@@ -54,6 +54,10 @@ public class DevoteeOrder {
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal total;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private OrderStatus status = OrderStatus.PLACED;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
