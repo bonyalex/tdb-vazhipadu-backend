@@ -84,6 +84,35 @@ class OrderApiIntegrationTest {
     }
 
     @Test
+    void largestPriceAndQuantityStillFitTheStoredTotals() throws Exception {
+        long expensiveId = createAndReadId("/api/offerings", offeringJson("Maha Pooja", "99999999.99", true));
+        String body = orderJson("9876543210", "[{\"offeringId\":" + expensiveId + ",\"quantity\":1000}]");
+
+        mockMvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.total").value(99999999990.00));
+    }
+
+    @Test
+    void listingOfferingsWithoutTempleIsRejectedInTheCommonErrorFormat() throws Exception {
+        mockMvc.perform(get("/api/offerings"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.details", hasItem("templeId: is required")));
+    }
+
+    @Test
+    void listingOfferingsIgnoresClientSortAndRejectsOversizedPage() throws Exception {
+        mockMvc.perform(get("/api/offerings").param("templeId", String.valueOf(templeId)).param("sort", "nope,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2));
+
+        mockMvc.perform(get("/api/offerings").param("templeId", String.valueOf(templeId)).param("size", "101"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validation failed"));
+    }
+
+    @Test
     void unknownOrderReturnsNotFoundInTheCommonErrorFormat() throws Exception {
         mockMvc.perform(get("/api/orders/999999"))
                 .andExpect(status().isNotFound())
