@@ -11,10 +11,12 @@ import com.example.vazhipadu.repository.OfferingRepository;
 import com.example.vazhipadu.repository.TempleRepository;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OfferingService {
@@ -28,14 +30,19 @@ public class OfferingService {
     public OfferingResponse create(CreateOfferingRequest request) {
         Temple temple = templeRepository
                 .findById(request.templeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Temple " + request.templeId() + " not found"));
+                .orElseThrow(() -> {
+                    log.warn("Offering create rejected: temple {} not found", request.templeId());
+                    return new ResourceNotFoundException("Temple " + request.templeId() + " not found");
+                });
         Offering offering = new Offering();
         offering.setTemple(temple);
         offering.setName(request.name().trim());
         offering.setPrice(normalise(request.price()));
         offering.setActive(request.active() == null || request.active());
         offering.setDailyLimit(request.dailyLimit());
-        return OfferingResponse.from(offeringRepository.save(offering));
+        Offering saved = offeringRepository.save(offering);
+        log.info("Created offering {} for temple {}", saved.getId(), temple.getId());
+        return OfferingResponse.from(saved);
     }
 
     @Transactional
@@ -45,6 +52,7 @@ public class OfferingService {
         offering.setPrice(normalise(request.price()));
         offering.setActive(request.active());
         offering.setDailyLimit(request.dailyLimit());
+        log.info("Updated offering {}", id);
         return OfferingResponse.from(offering);
     }
 
@@ -61,7 +69,10 @@ public class OfferingService {
     private Offering find(Long id) {
         return offeringRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Offering " + id + " not found"));
+                .orElseThrow(() -> {
+                    log.warn("Offering {} not found", id);
+                    return new ResourceNotFoundException("Offering " + id + " not found");
+                });
     }
 
     private BigDecimal normalise(BigDecimal price) {

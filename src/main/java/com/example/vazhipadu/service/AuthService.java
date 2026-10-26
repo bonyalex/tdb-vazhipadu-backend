@@ -7,8 +7,10 @@ import com.example.vazhipadu.exception.InvalidCredentialsException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -22,9 +24,11 @@ public class AuthService {
                 request.email().trim().toLowerCase());
         boolean passwordMatches = constantTimeEquals(properties.adminPassword(), request.password());
         if (!emailMatches || !passwordMatches) {
+            log.warn("Login failed");
             throw new InvalidCredentialsException();
         }
         String token = tokenService.issue(properties.adminEmail());
+        log.info("Admin login succeeded");
         return new LoginResponse(token, "Bearer", properties.tokenTtl().toSeconds());
     }
 

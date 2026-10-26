@@ -16,12 +16,14 @@ import com.example.vazhipadu.repository.DevoteeOrderRepository;
 import com.example.vazhipadu.repository.TempleRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderSearchService {
@@ -37,12 +39,15 @@ public class OrderSearchService {
     public PageResponse<OrderSummaryResponse> search(
             Long templeId, LocalDate from, LocalDate to, OrderStatus status, String phone, int page, int size) {
         if (from != null && to != null && from.isAfter(to)) {
+            log.warn("Order search rejected: from {} is after to {}", from, to);
             throw new InvalidRequestException("from must not be after to");
         }
         if (size < 1 || size > MAX_PAGE_SIZE) {
+            log.warn("Order search rejected: size {} is out of range", size);
             throw new InvalidRequestException("size must be between 1 and " + MAX_PAGE_SIZE);
         }
         if (!templeRepository.existsById(templeId)) {
+            log.warn("Order search rejected: temple {} not found", templeId);
             throw new ResourceNotFoundException("Temple " + templeId + " not found");
         }
         Specification<DevoteeOrder> filter =
