@@ -81,6 +81,18 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order " + id + " not found")));
     }
 
+    @Transactional
+    public OrderResponse cancel(Long id) {
+        DevoteeOrder order = orderRepository
+                .findByIdForUpdate(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order " + id + " not found"));
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new BusinessRuleException("Order " + id + " is already cancelled");
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        return OrderResponse.from(order);
+    }
+
     private void rejectDuplicateOfferings(List<OrderLineRequest> lines) {
         Set<Long> seen = new HashSet<>();
         for (OrderLineRequest line : lines) {
