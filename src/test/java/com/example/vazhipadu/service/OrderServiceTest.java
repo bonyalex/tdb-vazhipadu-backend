@@ -13,6 +13,7 @@ import com.example.vazhipadu.dto.response.OrderResponse;
 import com.example.vazhipadu.entity.DevoteeOrder;
 import com.example.vazhipadu.entity.Nakshatra;
 import com.example.vazhipadu.entity.Offering;
+import com.example.vazhipadu.entity.OrderStatus;
 import com.example.vazhipadu.entity.Temple;
 import com.example.vazhipadu.exception.BusinessRuleException;
 import com.example.vazhipadu.exception.InvalidRequestException;
@@ -63,7 +64,7 @@ class OrderServiceTest {
         Offering pushpanjali = offering(10L, temple, "30.00", true);
         Offering archana = offering(11L, temple, "50.00", true);
         when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
-        when(offeringRepository.findAllById(List.of(10L, 11L))).thenReturn(List.of(pushpanjali, archana));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L, 11L))).thenReturn(List.of(pushpanjali, archana));
         when(orderRepository.save(any(DevoteeOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
         PlaceOrderRequest request =
                 request(TODAY_IST, new OrderLineRequest(10L, 2), new OrderLineRequest(11L, 1));
@@ -79,7 +80,7 @@ class OrderServiceTest {
     void orderLineSnapshotsOfferingPriceAtBookingTime() {
         Offering pushpanjali = offering(10L, temple, "30.00", true);
         when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
-        when(offeringRepository.findAllById(List.of(10L))).thenReturn(List.of(pushpanjali));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(pushpanjali));
         when(orderRepository.save(any(DevoteeOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderResponse response = orderService.place(request(TODAY_IST, new OrderLineRequest(10L, 1)));
@@ -92,7 +93,7 @@ class OrderServiceTest {
     void orderForInactiveOfferingIsRejected() {
         Offering inactive = offering(10L, temple, "30.00", false);
         when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
-        when(offeringRepository.findAllById(List.of(10L))).thenReturn(List.of(inactive));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(inactive));
 
         assertThrows(
                 BusinessRuleException.class,
@@ -105,7 +106,7 @@ class OrderServiceTest {
     void orderForOfferingOfAnotherTempleIsRejected() {
         Offering foreign = offering(10L, temple(2L), "30.00", true);
         when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
-        when(offeringRepository.findAllById(List.of(10L))).thenReturn(List.of(foreign));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(foreign));
 
         assertThrows(
                 BusinessRuleException.class,
@@ -115,7 +116,7 @@ class OrderServiceTest {
     @Test
     void orderForUnknownOfferingIsNotFound() {
         when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
-        when(offeringRepository.findAllById(List.of(10L))).thenReturn(List.of());
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of());
 
         assertThrows(
                 ResourceNotFoundException.class,
@@ -142,6 +143,46 @@ class OrderServiceTest {
         when(orderRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> orderService.get(5L));
+    }
+
+    @Test
+    void orderForTwoIsRejectedWhenFourOfFiveAreBooked() {
+        Offering limited = offering(10L, temple, "30.00", true);
+        limited.setDailyLimit(5);
+        when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(limited));
+        when(orderRepository.sumBookedQuantity(10L, TODAY_IST, OrderStatus.PLACED)).thenReturn(4L);
+        PlaceOrderRequest request = request(TODAY_IST, new OrderLineRequest(10L, 2));
+
+        assertThrows(BusinessRuleException.class, () -> orderService.place(request));
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void orderForOneSucceedsWhenFourOfFiveAreBooked() {
+        Offering limited = offering(10L, temple, "30.00", true);
+        limited.setDailyLimit(5);
+        when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(limited));
+        when(orderRepository.sumBookedQuantity(10L, TODAY_IST, OrderStatus.PLACED)).thenReturn(4L);
+        when(orderRepository.save(any(DevoteeOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrderResponse response = orderService.place(request(TODAY_IST, new OrderLineRequest(10L, 1)));
+
+        assertEquals(1, response.lines().size());
+    }
+
+    @Test
+    void offeringWithoutDailyLimitNeverChecksBookedQuantity() {
+        Offering unlimited = offering(10L, temple, "30.00", true);
+        when(templeRepository.findById(1L)).thenReturn(Optional.of(temple));
+        when(offeringRepository.findAllByIdForUpdate(List.of(10L))).thenReturn(List.of(unlimited));
+        when(orderRepository.save(any(DevoteeOrder.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        orderService.place(request(TODAY_IST, new OrderLineRequest(10L, 500)));
+
+        verify(orderRepository, never()).sumBookedQuantity(any(), any(), any());
     }
 
     private PlaceOrderRequest request(LocalDate date, OrderLineRequest... lines) {

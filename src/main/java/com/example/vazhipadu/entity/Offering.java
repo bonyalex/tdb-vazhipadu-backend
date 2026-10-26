@@ -37,4 +37,7 @@ public class Offering {
 
     @Column(nullable = false)
     private boolean active;
+
+    @Column
+    private Integer dailyLimit;
 }
