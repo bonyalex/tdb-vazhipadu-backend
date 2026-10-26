@@ -7,7 +7,11 @@ meta {
 post {
   url: {{baseUrl}}/api/offerings
   body: json
-  auth: inherit
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{authToken}}
 }
 
 body:json {

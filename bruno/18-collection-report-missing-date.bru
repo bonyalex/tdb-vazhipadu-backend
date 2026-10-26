@@ -1,0 +1,22 @@
+meta {
+  name: 18 Collection Report - Missing Date (400)
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/temples/{{templeId}}/collection
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{authToken}}
+}
+
+tests {
+  test("date is required", function () {
+    expect(res.status).to.equal(400);
+    expect(res.body.success).to.equal(false);
+  });
+}

@@ -1,0 +1,31 @@
+meta {
+  name: 13 Collection Report
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/temples/{{templeId}}/collection?date={{orderDate}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{authToken}}
+}
+
+script:pre-request {
+  if (!bru.getVar("orderDate")) {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    bru.setVar("orderDate", tomorrow.toISOString().slice(0, 10));
+  }
+}
+
+tests {
+  test("report counts the placed order", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.data.totalCount).to.equal(3);
+    expect(res.body.data.totalAmount).to.equal(110);
+    expect(res.body.data.offerings.length).to.equal(2);
+  });
+}
