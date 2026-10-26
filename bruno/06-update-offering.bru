@@ -7,7 +7,11 @@ meta {
 put {
   url: {{baseUrl}}/api/offerings/{{archanaId}}
   body: json
-  auth: inherit
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{authToken}}
 }
 
 body:json {

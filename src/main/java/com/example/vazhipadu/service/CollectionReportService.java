@@ -7,9 +7,11 @@ import com.example.vazhipadu.repository.DevoteeOrderRepository;
 import com.example.vazhipadu.repository.TempleRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CollectionReportService {
@@ -19,7 +21,9 @@ public class CollectionReportService {
 
     @Transactional(readOnly = true)
     public DailyCollectionResponse dailyCollection(Long templeId, LocalDate date) {
+        log.info("Generating daily collection report for temple: {} on date: {}", templeId, date);
         if (!templeRepository.existsById(templeId)) {
+            log.warn("Rejecting collection report: temple {} not found", templeId);
             throw new ResourceNotFoundException("Temple " + templeId + " not found");
         }
         return DailyCollectionResponse.of(

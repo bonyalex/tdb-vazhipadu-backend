@@ -6,6 +6,7 @@ import com.example.vazhipadu.service.CollectionReportService;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
+@Slf4j
 @RestController
 @RequestMapping("/api/temples/{templeId}/collection")
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class CollectionReportController {
     public ResponseEntity<ApiResponse<DailyCollectionResponse>> dailyCollection(
             @PathVariable Long templeId,
             @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        log.debug("Received request for the daily collection report - templeId: {}, date: {}", templeId, date);
         return ResponseEntity.ok(ApiResponse.success(collectionReportService.dailyCollection(templeId, date)));
     }
 }

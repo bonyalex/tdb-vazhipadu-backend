@@ -6,9 +6,11 @@ import com.example.vazhipadu.entity.Temple;
 import com.example.vazhipadu.exception.ResourceNotFoundException;
 import com.example.vazhipadu.repository.TempleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TempleService {
@@ -17,15 +19,22 @@ public class TempleService {
 
     @Transactional
     public TempleResponse create(CreateTempleRequest request) {
+        log.info("Creating temple: {}", request.name().trim());
         Temple temple = new Temple();
         temple.setName(request.name().trim());
-        return TempleResponse.from(templeRepository.save(temple));
+        Temple saved = templeRepository.save(temple);
+        log.info("Successfully created temple: {}", saved.getId());
+        return TempleResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
     public TempleResponse get(Long id) {
+        log.info("Retrieving temple: {}", id);
         return TempleResponse.from(templeRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Temple " + id + " not found")));
+                .orElseThrow(() -> {
+                    log.warn("Temple {} not found", id);
+                    return new ResourceNotFoundException("Temple " + id + " not found");
+                }));
     }
 }

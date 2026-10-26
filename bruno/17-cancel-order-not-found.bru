@@ -1,0 +1,22 @@
+meta {
+  name: 17 Cancel Order - Not Found (404)
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/api/orders/999999/cancel
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{authToken}}
+}
+
+tests {
+  test("not found", function () {
+    expect(res.status).to.equal(404);
+    expect(res.body.error.status).to.equal(404);
+  });
+}
