@@ -39,7 +39,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponse>> place(@Valid @RequestBody PlaceOrderRequest request) {
-        log.info("POST /api/orders for temple {}", request.templeId());
+        log.debug("Received request to place an order for temple: {}", request.templeId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(orderService.place(request)));
     }
 
@@ -52,19 +52,26 @@ public class OrderController {
             @RequestParam(required = false) @Pattern(regexp = "[0-9]{10}", message = "must be exactly 10 digits") String phone,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(OrderSearchService.MAX_PAGE_SIZE) int size) {
-        log.info("GET /api/orders for temple {} page {} size {}", templeId, page, size);
+        log.debug(
+                "Received request to search orders - templeId: {}, from: {}, to: {}, status: {}, page: {}, size: {}",
+                templeId,
+                from,
+                to,
+                status,
+                page,
+                size);
         return ResponseEntity.ok(ApiResponse.success(orderSearchService.search(templeId, from, to, status, phone, page, size)));
     }
 
     @PostMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<OrderResponse>> cancel(@PathVariable Long id) {
-        log.info("POST /api/orders/{}/cancel", id);
+        log.debug("Received request to cancel order: {}", id);
         return ResponseEntity.ok(ApiResponse.success(orderService.cancel(id)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<OrderResponse>> get(@PathVariable Long id) {
-        log.info("GET /api/orders/{}", id);
+        log.debug("Received request to fetch order: {}", id);
         return ResponseEntity.ok(ApiResponse.success(orderService.get(id)));
     }
 }

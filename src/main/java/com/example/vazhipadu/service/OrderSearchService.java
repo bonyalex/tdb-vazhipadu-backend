@@ -17,6 +17,7 @@ import com.example.vazhipadu.repository.TempleRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -38,22 +39,31 @@ public class OrderSearchService {
     @Transactional(readOnly = true)
     public PageResponse<OrderSummaryResponse> search(
             Long templeId, LocalDate from, LocalDate to, OrderStatus status, String phone, int page, int size) {
+        log.info(
+                "Searching orders for temple: {} with filters - from: {}, to: {}, status: {}, phoneFilter: {}, page: {}, size: {}",
+                templeId,
+                from,
+                to,
+                status,
+                phone != null,
+                page,
+                size);
         if (from != null && to != null && from.isAfter(to)) {
-            log.warn("Order search rejected: from {} is after to {}", from, to);
+            log.warn("Rejecting order search: from {} is after to {}", from, to);
             throw new InvalidRequestException("from must not be after to");
         }
         if (size < 1 || size > MAX_PAGE_SIZE) {
-            log.warn("Order search rejected: size {} is out of range", size);
+            log.warn("Rejecting order search: size {} is outside the allowed range 1 to {}", size, MAX_PAGE_SIZE);
             throw new InvalidRequestException("size must be between 1 and " + MAX_PAGE_SIZE);
         }
         if (!templeRepository.existsById(templeId)) {
-            log.warn("Order search rejected: temple {} not found", templeId);
+            log.warn("Rejecting order search: temple {} not found", templeId);
             throw new ResourceNotFoundException("Temple " + templeId + " not found");
         }
         Specification<DevoteeOrder> filter =
                 forTemple(templeId).and(dateFrom(from)).and(dateTo(to)).and(hasStatus(status)).and(hasPhone(phone));
-        return PageResponse.from(orderRepository
-                .findAll(filter, PageRequest.of(page, size, STABLE_ORDER))
-                .map(OrderSummaryResponse::from));
+        Page<DevoteeOrder> found = orderRepository.findAll(filter, PageRequest.of(page, size, STABLE_ORDER));
+        log.info("Found {} orders on page {} for temple: {}", found.getNumberOfElements(), page, templeId);
+        return PageResponse.from(found.map(OrderSummaryResponse::from));
     }
 }

@@ -26,13 +26,13 @@ public class TempleController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<TempleResponse>> create(@Valid @RequestBody CreateTempleRequest request) {
-        log.info("POST /api/temples");
+        log.debug("Received request to create a temple");
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(templeService.create(request)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TempleResponse>> get(@PathVariable Long id) {
-        log.info("GET /api/temples/{}", id);
+        log.debug("Received request to fetch temple: {}", id);
         return ResponseEntity.ok(ApiResponse.success(templeService.get(id)));
     }
 }

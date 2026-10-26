@@ -36,19 +36,19 @@ public class OfferingController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<OfferingResponse>> create(@Valid @RequestBody CreateOfferingRequest request) {
-        log.info("POST /api/offerings for temple {}", request.templeId());
+        log.debug("Received request to create an offering for temple: {}", request.templeId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(offeringService.create(request)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<OfferingResponse>> update(@PathVariable Long id, @Valid @RequestBody UpdateOfferingRequest request) {
-        log.info("PUT /api/offerings/{}", id);
+        log.debug("Received request to update offering: {}", id);
         return ResponseEntity.ok(ApiResponse.success(offeringService.update(id, request)));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<OfferingResponse>> get(@PathVariable Long id) {
-        log.info("GET /api/offerings/{}", id);
+        log.debug("Received request to fetch offering: {}", id);
         return ResponseEntity.ok(ApiResponse.success(offeringService.get(id)));
     }
 
@@ -57,7 +57,7 @@ public class OfferingController {
             @RequestParam Long templeId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        log.info("GET /api/offerings for temple {} page {} size {}", templeId, page, size);
+        log.debug("Received request to list offerings - templeId: {}, page: {}, size: {}", templeId, page, size);
         return ResponseEntity.ok(ApiResponse.success(offeringService.listByTemple(templeId, PageRequest.of(page, size, Sort.by("id")))));
     }
 }

@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
-        log.info("POST /api/auth/login");
+        log.debug("Received admin login request");
         return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
     }
 }

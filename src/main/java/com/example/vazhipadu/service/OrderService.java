@@ -43,15 +43,23 @@ public class OrderService {
 
     @Transactional
     public OrderResponse place(PlaceOrderRequest request) {
+        log.info(
+                "Placing order for temple: {} on date: {} with {} line(s)",
+                request.templeId(),
+                request.orderDate(),
+                request.lines().size());
         if (request.orderDate().isBefore(LocalDate.now(clock.withZone(TEMPLE_ZONE)))) {
-            log.warn("Order rejected for temple {}: order date {} is in the past", request.templeId(), request.orderDate());
+            log.warn(
+                    "Rejecting order for temple {}: order date {} is before today",
+                    request.templeId(),
+                    request.orderDate());
             throw new InvalidRequestException("Order date must not be in the past");
         }
         rejectDuplicateOfferings(request.lines());
         Temple temple = templeRepository
                 .findById(request.templeId())
                 .orElseThrow(() -> {
-                    log.warn("Order rejected: temple {} not found", request.templeId());
+                    log.warn("Rejecting order: temple {} not found", request.templeId());
                     return new ResourceNotFoundException("Temple " + request.templeId() + " not found");
                 });
         Map<Long, Offering> offerings = loadOfferings(request.lines());
@@ -78,12 +86,18 @@ public class OrderService {
         }
         order.setTotal(total);
         DevoteeOrder saved = orderRepository.save(order);
-        log.info("Placed order {} for temple {} on {} with total {}", saved.getId(), temple.getId(), saved.getOrderDate(), total);
+        log.info(
+                "Successfully placed order: {} for temple: {} on date: {} with total: {}",
+                saved.getId(),
+                temple.getId(),
+                saved.getOrderDate(),
+                total);
         return OrderResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
     public OrderResponse get(Long id) {
+        log.info("Retrieving order: {}", id);
         return OrderResponse.from(orderRepository
                 .findById(id)
                 .orElseThrow(() -> {
@@ -94,18 +108,19 @@ public class OrderService {
 
     @Transactional
     public OrderResponse cancel(Long id) {
+        log.info("Cancelling order: {}", id);
         DevoteeOrder order = orderRepository
                 .findByIdForUpdate(id)
                 .orElseThrow(() -> {
-                    log.warn("Cancel rejected: order {} not found", id);
+                    log.warn("Rejecting cancel request: order {} not found", id);
                     return new ResourceNotFoundException("Order " + id + " not found");
                 });
         if (order.getStatus() == OrderStatus.CANCELLED) {
-            log.warn("Cancel rejected: order {} is already cancelled", id);
+            log.warn("Rejecting cancel request: order {} is already cancelled", id);
             throw new BusinessRuleException("Order " + id + " is already cancelled");
         }
         order.setStatus(OrderStatus.CANCELLED);
-        log.info("Cancelled order {}", id);
+        log.info("Successfully cancelled order: {}", id);
         return OrderResponse.from(order);
     }
 
@@ -113,7 +128,7 @@ public class OrderService {
         Set<Long> seen = new HashSet<>();
         for (OrderLineRequest line : lines) {
             if (!seen.add(line.offeringId())) {
-                log.warn("Order rejected: offering {} appears more than once", line.offeringId());
+                log.warn("Rejecting order: offering {} appears more than once in the request", line.offeringId());
                 throw new InvalidRequestException("Offering " + line.offeringId() + " appears more than once");
             }
         }
@@ -125,7 +140,7 @@ public class OrderService {
                 .collect(Collectors.toMap(Offering::getId, Function.identity()));
         for (Long id : ids) {
             if (!offerings.containsKey(id)) {
-                log.warn("Order rejected: offering {} not found", id);
+                log.warn("Rejecting order: offering {} not found", id);
                 throw new ResourceNotFoundException("Offering " + id + " not found");
             }
         }
@@ -139,7 +154,13 @@ public class OrderService {
         }
         long booked = orderRepository.sumBookedQuantity(offering.getId(), orderDate, OrderStatus.PLACED);
         if (booked + quantity > limit) {
-            log.warn("Order rejected: offering {} daily limit {} exceeded on {}", offering.getId(), limit, orderDate);
+            log.warn(
+                    "Rejecting order: offering {} has a daily limit of {} with {} already booked on {}, requested {}",
+                    offering.getId(),
+                    limit,
+                    booked,
+                    orderDate,
+                    quantity);
             throw new BusinessRuleException("Offering " + offering.getId() + " has only "
                     + Math.max(0, limit - booked) + " left for " + orderDate);
         }
@@ -147,11 +168,11 @@ public class OrderService {
 
     private void ensureBookable(Offering offering, Temple temple) {
         if (!offering.getTemple().getId().equals(temple.getId())) {
-            log.warn("Order rejected: offering {} does not belong to temple {}", offering.getId(), temple.getId());
+            log.warn("Rejecting order: offering {} does not belong to temple {}", offering.getId(), temple.getId());
             throw new BusinessRuleException("Offering " + offering.getId() + " does not belong to this temple");
         }
         if (!offering.isActive()) {
-            log.warn("Order rejected: offering {} is not active", offering.getId());
+            log.warn("Rejecting order: offering {} is not active", offering.getId());
             throw new BusinessRuleException("Offering " + offering.getId() + " is not active");
         }
     }

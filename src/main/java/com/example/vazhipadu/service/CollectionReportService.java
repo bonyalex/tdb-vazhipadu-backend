@@ -21,8 +21,9 @@ public class CollectionReportService {
 
     @Transactional(readOnly = true)
     public DailyCollectionResponse dailyCollection(Long templeId, LocalDate date) {
+        log.info("Generating daily collection report for temple: {} on date: {}", templeId, date);
         if (!templeRepository.existsById(templeId)) {
-            log.warn("Collection report rejected: temple {} not found", templeId);
+            log.warn("Rejecting collection report: temple {} not found", templeId);
             throw new ResourceNotFoundException("Temple " + templeId + " not found");
         }
         return DailyCollectionResponse.of(

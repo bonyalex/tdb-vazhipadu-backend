@@ -19,16 +19,17 @@ public class AuthService {
     private final TokenService tokenService;
 
     public LoginResponse login(LoginRequest request) {
+        log.info("Processing admin login request");
         boolean emailMatches = constantTimeEquals(
                 properties.adminEmail().trim().toLowerCase(),
                 request.email().trim().toLowerCase());
         boolean passwordMatches = constantTimeEquals(properties.adminPassword(), request.password());
         if (!emailMatches || !passwordMatches) {
-            log.warn("Login failed");
+            log.warn("Rejecting login: the supplied credentials do not match the configured admin");
             throw new InvalidCredentialsException();
         }
         String token = tokenService.issue(properties.adminEmail());
-        log.info("Admin login succeeded");
+        log.info("Successfully authenticated the admin; issued a token valid for {} seconds", properties.tokenTtl().toSeconds());
         return new LoginResponse(token, "Bearer", properties.tokenTtl().toSeconds());
     }
 

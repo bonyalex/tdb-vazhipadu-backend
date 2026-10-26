@@ -29,7 +29,7 @@ public class CollectionReportController {
     public ResponseEntity<ApiResponse<DailyCollectionResponse>> dailyCollection(
             @PathVariable Long templeId,
             @RequestParam @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        log.info("GET /api/temples/{}/collection for {}", templeId, date);
+        log.debug("Received request for the daily collection report - templeId: {}, date: {}", templeId, date);
         return ResponseEntity.ok(ApiResponse.success(collectionReportService.dailyCollection(templeId, date)));
     }
 }

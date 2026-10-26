@@ -19,15 +19,17 @@ public class TempleService {
 
     @Transactional
     public TempleResponse create(CreateTempleRequest request) {
+        log.info("Creating temple: {}", request.name().trim());
         Temple temple = new Temple();
         temple.setName(request.name().trim());
         Temple saved = templeRepository.save(temple);
-        log.info("Created temple {}", saved.getId());
+        log.info("Successfully created temple: {}", saved.getId());
         return TempleResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
     public TempleResponse get(Long id) {
+        log.info("Retrieving temple: {}", id);
         return TempleResponse.from(templeRepository
                 .findById(id)
                 .orElseThrow(() -> {
