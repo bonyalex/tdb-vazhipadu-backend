@@ -1,6 +1,7 @@
 package com.example.vazhipadu.controller;
 
 import com.example.vazhipadu.dto.request.CreateTempleRequest;
+import com.example.vazhipadu.dto.response.ApiResponse;
 import com.example.vazhipadu.dto.response.TempleResponse;
 import com.example.vazhipadu.service.TempleService;
 import jakarta.validation.Valid;
@@ -23,12 +24,12 @@ public class TempleController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TempleResponse create(@Valid @RequestBody CreateTempleRequest request) {
-        return templeService.create(request);
+    public ApiResponse<TempleResponse> create(@Valid @RequestBody CreateTempleRequest request) {
+        return ApiResponse.success(templeService.create(request));
     }
 
     @GetMapping("/{id}")
-    public TempleResponse get(@PathVariable Long id) {
-        return templeService.get(id);
+    public ApiResponse<TempleResponse> get(@PathVariable Long id) {
+        return ApiResponse.success(templeService.get(id));
     }
 }

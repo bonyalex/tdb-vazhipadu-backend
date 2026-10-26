@@ -51,10 +51,10 @@ class OrderApiIntegrationTest {
 
         mockMvc.perform(get("/api/orders/" + orderId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total").value(110.00))
-                .andExpect(jsonPath("$.devoteePhone").value("9876543210"))
-                .andExpect(jsonPath("$.nakshatra").value("ROHINI"))
-                .andExpect(jsonPath("$.lines.length()").value(2));
+                .andExpect(jsonPath("$.data.total").value(110.00))
+                .andExpect(jsonPath("$.data.devoteePhone").value("9876543210"))
+                .andExpect(jsonPath("$.data.nakshatra").value("ROHINI"))
+                .andExpect(jsonPath("$.data.lines.length()").value(2));
     }
 
     @Test
@@ -67,8 +67,8 @@ class OrderApiIntegrationTest {
 
         mockMvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.message").value("Offering " + archanaId + " is not active"));
+                .andExpect(jsonPath("$.error.status").value(409))
+                .andExpect(jsonPath("$.error.message").value("Offering " + archanaId + " is not active"));
     }
 
     @Test
@@ -77,10 +77,10 @@ class OrderApiIntegrationTest {
 
         mockMvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Validation failed"))
-                .andExpect(jsonPath("$.details", hasItem("devoteePhone: must be exactly 10 digits")))
-                .andExpect(jsonPath("$.details", hasItem("lines[0].quantity: must be greater than or equal to 1")));
+                .andExpect(jsonPath("$.error.status").value(400))
+                .andExpect(jsonPath("$.error.message").value("Validation failed"))
+                .andExpect(jsonPath("$.error.details", hasItem("devoteePhone: must be exactly 10 digits")))
+                .andExpect(jsonPath("$.error.details", hasItem("lines[0].quantity: must be greater than or equal to 1")));
     }
 
     @Test
@@ -90,34 +90,34 @@ class OrderApiIntegrationTest {
 
         mockMvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.total").value(99999999990.00));
+                .andExpect(jsonPath("$.data.total").value(99999999990.00));
     }
 
     @Test
     void listingOfferingsWithoutTempleIsRejectedInTheCommonErrorFormat() throws Exception {
         mockMvc.perform(get("/api/offerings"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.details", hasItem("templeId: is required")));
+                .andExpect(jsonPath("$.error.status").value(400))
+                .andExpect(jsonPath("$.error.details", hasItem("templeId: is required")));
     }
 
     @Test
     void listingOfferingsIgnoresClientSortAndRejectsOversizedPage() throws Exception {
         mockMvc.perform(get("/api/offerings").param("templeId", String.valueOf(templeId)).param("sort", "nope,asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2));
+                .andExpect(jsonPath("$.data.content.length()").value(2));
 
         mockMvc.perform(get("/api/offerings").param("templeId", String.valueOf(templeId)).param("size", "101"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Validation failed"));
+                .andExpect(jsonPath("$.error.message").value("Validation failed"));
     }
 
     @Test
     void unknownOrderReturnsNotFoundInTheCommonErrorFormat() throws Exception {
         mockMvc.perform(get("/api/orders/999999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.path").value("/api/orders/999999"));
+                .andExpect(jsonPath("$.error.status").value(404))
+                .andExpect(jsonPath("$.error.path").value("/api/orders/999999"));
     }
 
     private String offeringJson(String name, String price, boolean active) {
@@ -138,6 +138,6 @@ class OrderApiIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         JsonNode node = objectMapper.readTree(response);
-        return node.get("id").asLong();
+        return node.get("data").get("id").asLong();
     }
 }

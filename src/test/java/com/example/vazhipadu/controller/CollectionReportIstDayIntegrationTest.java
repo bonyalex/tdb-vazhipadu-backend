@@ -52,11 +52,11 @@ class CollectionReportIstDayIntegrationTest {
 
         mockMvc.perform(get("/api/temples/" + templeId + "/collection").param("date", "2026-10-26"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCount").value(1))
-                .andExpect(jsonPath("$.totalAmount").value(30.00));
+                .andExpect(jsonPath("$.data.totalCount").value(1))
+                .andExpect(jsonPath("$.data.totalAmount").value(30.00));
         mockMvc.perform(get("/api/temples/" + templeId + "/collection").param("date", "2026-10-25"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalCount").value(0));
+                .andExpect(jsonPath("$.data.totalCount").value(0));
     }
 
     private long createAndReadId(String url, String body) throws Exception {
@@ -65,6 +65,6 @@ class CollectionReportIstDayIntegrationTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        return objectMapper.readTree(response).get("id").asLong();
+        return objectMapper.readTree(response).get("data").get("id").asLong();
     }
 }

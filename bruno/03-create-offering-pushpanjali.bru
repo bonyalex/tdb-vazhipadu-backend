@@ -20,12 +20,12 @@ body:json {
 }
 
 script:post-response {
-  bru.setVar("pushpanjaliId", res.body.id);
+  bru.setVar("pushpanjaliId", res.body.data.id);
 }
 
 tests {
   test("created", function () {
     expect(res.status).to.equal(201);
-    expect(res.body.active).to.equal(true);
+    expect(res.body.data.active).to.equal(true);
   });
 }

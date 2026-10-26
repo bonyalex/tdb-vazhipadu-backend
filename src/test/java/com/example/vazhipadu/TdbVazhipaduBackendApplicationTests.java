@@ -28,7 +28,7 @@ class TdbVazhipaduBackendApplicationTests {
     void unknownPathReturnsJsonNotFound() throws Exception {
         mockMvc.perform(get("/does-not-exist"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.path").value("/does-not-exist"));
+                .andExpect(jsonPath("$.error.status").value(404))
+                .andExpect(jsonPath("$.error.path").value("/does-not-exist"));
     }
 }

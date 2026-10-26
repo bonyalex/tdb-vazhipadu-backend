@@ -20,7 +20,7 @@ body:json {
 }
 
 script:post-response {
-  bru.setVar("archanaId", res.body.id);
+  bru.setVar("archanaId", res.body.data.id);
 }
 
 tests {

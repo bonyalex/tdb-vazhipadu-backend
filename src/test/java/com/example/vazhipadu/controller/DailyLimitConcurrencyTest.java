@@ -87,6 +87,6 @@ class DailyLimitConcurrencyTest {
                 .getResponse()
                 .getContentAsString();
         JsonNode node = objectMapper.readTree(response);
-        return node.get("id").asLong();
+        return node.get("data").get("id").asLong();
     }
 }

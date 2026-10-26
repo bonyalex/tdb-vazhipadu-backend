@@ -1,6 +1,7 @@
 package com.example.vazhipadu.controller;
 
 import com.example.vazhipadu.dto.request.PlaceOrderRequest;
+import com.example.vazhipadu.dto.response.ApiResponse;
 import com.example.vazhipadu.dto.response.OrderResponse;
 import com.example.vazhipadu.dto.response.OrderSummaryResponse;
 import com.example.vazhipadu.dto.response.PageResponse;
@@ -36,12 +37,12 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse place(@Valid @RequestBody PlaceOrderRequest request) {
-        return orderService.place(request);
+    public ApiResponse<OrderResponse> place(@Valid @RequestBody PlaceOrderRequest request) {
+        return ApiResponse.success(orderService.place(request));
     }
 
     @GetMapping
-    public PageResponse<OrderSummaryResponse> search(
+    public ApiResponse<PageResponse<OrderSummaryResponse>> search(
             @RequestParam Long templeId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
@@ -49,16 +50,16 @@ public class OrderController {
             @RequestParam(required = false) @Pattern(regexp = "[0-9]{10}", message = "must be exactly 10 digits") String phone,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(OrderSearchService.MAX_PAGE_SIZE) int size) {
-        return orderSearchService.search(templeId, from, to, status, phone, page, size);
+        return ApiResponse.success(orderSearchService.search(templeId, from, to, status, phone, page, size));
     }
 
     @PostMapping("/{id}/cancel")
-    public OrderResponse cancel(@PathVariable Long id) {
-        return orderService.cancel(id);
+    public ApiResponse<OrderResponse> cancel(@PathVariable Long id) {
+        return ApiResponse.success(orderService.cancel(id));
     }
 
     @GetMapping("/{id}")
-    public OrderResponse get(@PathVariable Long id) {
-        return orderService.get(id);
+    public ApiResponse<OrderResponse> get(@PathVariable Long id) {
+        return ApiResponse.success(orderService.get(id));
     }
 }

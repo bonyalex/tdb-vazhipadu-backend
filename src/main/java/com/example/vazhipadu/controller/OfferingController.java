@@ -2,6 +2,7 @@ package com.example.vazhipadu.controller;
 
 import com.example.vazhipadu.dto.request.CreateOfferingRequest;
 import com.example.vazhipadu.dto.request.UpdateOfferingRequest;
+import com.example.vazhipadu.dto.response.ApiResponse;
 import com.example.vazhipadu.dto.response.OfferingResponse;
 import com.example.vazhipadu.dto.response.PageResponse;
 import com.example.vazhipadu.service.OfferingService;
@@ -33,25 +34,25 @@ public class OfferingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OfferingResponse create(@Valid @RequestBody CreateOfferingRequest request) {
-        return offeringService.create(request);
+    public ApiResponse<OfferingResponse> create(@Valid @RequestBody CreateOfferingRequest request) {
+        return ApiResponse.success(offeringService.create(request));
     }
 
     @PutMapping("/{id}")
-    public OfferingResponse update(@PathVariable Long id, @Valid @RequestBody UpdateOfferingRequest request) {
-        return offeringService.update(id, request);
+    public ApiResponse<OfferingResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateOfferingRequest request) {
+        return ApiResponse.success(offeringService.update(id, request));
     }
 
     @GetMapping("/{id}")
-    public OfferingResponse get(@PathVariable Long id) {
-        return offeringService.get(id);
+    public ApiResponse<OfferingResponse> get(@PathVariable Long id) {
+        return ApiResponse.success(offeringService.get(id));
     }
 
     @GetMapping
-    public PageResponse<OfferingResponse> list(
+    public ApiResponse<PageResponse<OfferingResponse>> list(
             @RequestParam Long templeId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return offeringService.listByTemple(templeId, PageRequest.of(page, size, Sort.by("id")));
+        return ApiResponse.success(offeringService.listByTemple(templeId, PageRequest.of(page, size, Sort.by("id"))));
     }
 }

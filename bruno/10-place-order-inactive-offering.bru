@@ -26,6 +26,6 @@ body:json {
 tests {
   test("rejected", function () {
     expect(res.status).to.equal(409);
-    expect(res.body.status).to.equal(409);
+    expect(res.body.error.status).to.equal(409);
   });
 }
