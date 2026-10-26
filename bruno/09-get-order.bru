@@ -1,0 +1,19 @@
+meta {
+  name: 09 Get Order
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/orders/{{orderId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("found with lines", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.total).to.equal(110);
+    expect(res.body.lines.length).to.equal(2);
+  });
+}

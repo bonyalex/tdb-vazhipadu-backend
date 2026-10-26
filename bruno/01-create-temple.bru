@@ -1,0 +1,27 @@
+meta {
+  name: 01 Create Temple
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/temples
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Sree Temple"
+  }
+}
+
+script:post-response {
+  bru.setVar("templeId", res.body.id);
+}
+
+tests {
+  test("created", function () {
+    expect(res.status).to.equal(201);
+  });
+}

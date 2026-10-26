@@ -1,0 +1,41 @@
+meta {
+  name: 08 Place Order - total 110
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/orders
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "templeId": {{templeId}},
+    "devoteeName": "Anil Kumar",
+    "devoteePhone": "9876543210",
+    "nakshatra": "ROHINI",
+    "orderDate": "{{orderDate}}",
+    "lines": [
+      { "offeringId": {{pushpanjaliId}}, "quantity": 2 },
+      { "offeringId": {{archanaId}}, "quantity": 1 }
+    ]
+  }
+}
+
+script:pre-request {
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  bru.setVar("orderDate", tomorrow.toISOString().slice(0, 10));
+}
+
+script:post-response {
+  bru.setVar("orderId", res.body.id);
+}
+
+tests {
+  test("total is 110", function () {
+    expect(res.status).to.equal(201);
+    expect(res.body.total).to.equal(110);
+  });
+}

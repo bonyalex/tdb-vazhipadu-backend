@@ -1,0 +1,18 @@
+meta {
+  name: 02 Get Temple
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/temples/{{templeId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("found", function () {
+    expect(res.status).to.equal(200);
+    expect(res.body.name).to.equal("Sree Temple");
+  });
+}

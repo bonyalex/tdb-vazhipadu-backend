@@ -1,0 +1,31 @@
+meta {
+  name: 10 Place Order - Inactive Offering (409)
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/orders
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "templeId": {{templeId}},
+    "devoteeName": "Anil Kumar",
+    "devoteePhone": "9876543210",
+    "nakshatra": "ROHINI",
+    "orderDate": "{{orderDate}}",
+    "lines": [
+      { "offeringId": {{inactiveOfferingId}}, "quantity": 1 }
+    ]
+  }
+}
+
+tests {
+  test("rejected", function () {
+    expect(res.status).to.equal(409);
+    expect(res.body.status).to.equal(409);
+  });
+}

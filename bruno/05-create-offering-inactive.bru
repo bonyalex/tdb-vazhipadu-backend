@@ -1,0 +1,31 @@
+meta {
+  name: 05 Create Offering - Inactive
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/offerings
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "templeId": {{templeId}},
+    "name": "Retired Pooja",
+    "price": 100.00,
+    "active": false
+  }
+}
+
+script:post-response {
+  bru.setVar("inactiveOfferingId", res.body.id);
+}
+
+tests {
+  test("created inactive", function () {
+    expect(res.status).to.equal(201);
+    expect(res.body.active).to.equal(false);
+  });
+}
