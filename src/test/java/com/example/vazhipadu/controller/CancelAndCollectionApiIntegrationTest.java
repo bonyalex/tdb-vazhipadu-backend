@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import com.example.vazhipadu.support.AuthenticatedAsAdmin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AuthenticatedAsAdmin
 class CancelAndCollectionApiIntegrationTest {
 
     private static final LocalDate DATE = LocalDate.now(ZoneId.of("Asia/Kolkata")).plusDays(1);
