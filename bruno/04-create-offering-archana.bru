@@ -1,0 +1,30 @@
+meta {
+  name: 04 Create Offering - Archana 50
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/offerings
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "templeId": {{templeId}},
+    "name": "Archana",
+    "price": 50.00,
+    "active": true
+  }
+}
+
+script:post-response {
+  bru.setVar("archanaId", res.body.id);
+}
+
+tests {
+  test("created", function () {
+    expect(res.status).to.equal(201);
+  });
+}

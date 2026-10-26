@@ -1,0 +1,25 @@
+meta {
+  name: 06 Update Offering
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/offerings/{{archanaId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Archana",
+    "price": 50.00,
+    "active": true
+  }
+}
+
+tests {
+  test("updated", function () {
+    expect(res.status).to.equal(200);
+  });
+}

@@ -1,0 +1,18 @@
+meta {
+  name: 12 Get Order - Not Found (404)
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/orders/999999
+  body: none
+  auth: none
+}
+
+tests {
+  test("not found error shape", function () {
+    expect(res.status).to.equal(404);
+    expect(res.body.status).to.equal(404);
+  });
+}

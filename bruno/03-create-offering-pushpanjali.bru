@@ -1,0 +1,31 @@
+meta {
+  name: 03 Create Offering - Pushpanjali 30
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/offerings
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "templeId": {{templeId}},
+    "name": "Pushpanjali",
+    "price": 30.00,
+    "active": true
+  }
+}
+
+script:post-response {
+  bru.setVar("pushpanjaliId", res.body.id);
+}
+
+tests {
+  test("created", function () {
+    expect(res.status).to.equal(201);
+    expect(res.body.active).to.equal(true);
+  });
+}
